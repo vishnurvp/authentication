@@ -1,11 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 
 import classes from "./AuthForm.module.css";
+import AuthContext from "../../store/auth-context";
 
 const AuthForm = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
 
+  const authCtx = useContext(AuthContext);
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,23 +31,22 @@ const AuthForm = () => {
             returnSecureToken: true,
           }),
           headers: {
-            'Content-Type': 'application/json',
-          }
+            "Content-Type": "application/json",
+          },
         }
-      ).then((res)=> {
+      ).then((res) => {
         setIsLoading(false);
-        if(res.ok){
-          res.json().then((data)=> {
-            console.log(data);
-            console.log(data.idToken);
-          })
+        if (res.ok) {
+          res.json().then((data) => {
+            authCtx.login(data.idToken);
+          });
         } else {
           return res.json().then((data) => {
-            if(data.error.message) alert(data.error.message);
-            else alert('There is an error');
-          })
+            if (data.error.message) alert(data.error.message);
+            else alert("There is an error");
+          });
         }
-      })
+      });
     } else {
       fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=
