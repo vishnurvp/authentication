@@ -17,13 +17,13 @@ const AuthForm = () => {
     setIsLogin((prevState) => !prevState);
   };
 
-  const submitHandler = (event) => {
+  const submitHandler = async (event) => {
     event.preventDefault();
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
     setIsLoading(true);
     if (isLogin) {
-      fetch(
+      const response = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyATSgSMpr3jfW-XkIVGxfuOTAzHiqS9J6I`,
         {
           method: "POST",
@@ -36,24 +36,20 @@ const AuthForm = () => {
             "Content-Type": "application/json",
           },
         }
-      ).then((res) => {
-        setIsLoading(false);
-        if (res.ok) {
-          res.json().then((data) => {
-            authCtx.login(data.idToken);
-            history.replace('/');
-          });
-        } else {
-          return res.json().then((data) => {
-            if (data.error.message) alert(data.error.message);
-            else alert("There is an error");
-          });
-        }
-      });
+      )
+      setIsLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        authCtx.login(data.idToken);
+        history.replace('/');
+      } else {
+        const data = await response.json();
+        if (data.error.message) alert(data.error.message);
+        else alert("There is an error");
+      }
     } else {
-      fetch(
-        `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=
-      AIzaSyATSgSMpr3jfW-XkIVGxfuOTAzHiqS9J6I`,
+      const response = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyATSgSMpr3jfW-XkIVGxfuOTAzHiqS9J6I`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -65,19 +61,17 @@ const AuthForm = () => {
             "Content-Type": "application/json",
           },
         }
-      ).then((res) => {
-        setIsLoading(false);
-        if (res.ok) {
-          //...
-        } else {
-          return res.json().then((data) => {
-            const generalError = "Authentication failed";
-            const errmsg = data.error.message;
-            if (errmsg) alert(data.error.message);
-            else alert(generalError);
-          });
-        }
-      });
+      );
+      setIsLoading(false);
+      if (response.ok){
+        // const data = await response.json();
+      } else {
+        const data = await response.json();
+        const generalError = "Authentication failed";
+        const errmsg = data.error.message;
+        if (errmsg) alert(data.error.message);
+        else alert(generalError);
+      }
     }
   };
 
